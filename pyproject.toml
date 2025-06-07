@@ -1,0 +1,37 @@
+[project]
+name = "szia-ai-tools"
+version = "0.1.0"
+description = "A lightweight Python toolkit designed for building basic Generative AI applications with minimal setup."
+authors = [{ name = "Marton Antal Szel", email = "marton.szel@lynxanalytics.com" }]
+license = "Apache-2.0"
+readme = "README.md"
+requires-python = ">=3.12"
+
+dependencies = [
+    "openai",
+    "pandas",
+    "numpy"
+]
+
+[project.optional-dependencies]
+dev = ["pre-commit", "ruff", "black", "pytest"]
+ingest = ["beautifulsoup4", "html2text"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sziaaitls", "sziaaitls.*"]
+exclude = ["data", "data.*", "notebooks", "notebooks.*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = ["notebooks", "data"]
+extend-include = ["*.py"]
+
+[tool.ruff.lint]
+select = ["I", "UP", "B"]
+ignore = ["E203", "E266"]
