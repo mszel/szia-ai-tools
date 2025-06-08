@@ -13,11 +13,12 @@ dependencies = [
     "numpy",
     "ipykernel",
     "tiktoken",
+    "matplotlib",
 ]
 
 [project.optional-dependencies]
 dev = ["pre-commit", "ruff", "black", "pytest"]
-ingest = ["beautifulsoup4", "html2text", "pdfminer.six"]
+ingest = ["beautifulsoup4", "html2text", "pdfminer.six", "aiohttp"]
 
 [build-system]
 requires = ["setuptools>=61"]

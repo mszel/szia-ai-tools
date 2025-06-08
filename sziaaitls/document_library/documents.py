@@ -107,6 +107,7 @@ class Document(ABC):
         min_chunk_size: int = 0,
         min_leftover_chunk_size: int = 0,
         text_split_order: list[str] = None,
+        tokenizer: str = "cl100k_base",
     ):
         """
         Initialize a Document.
@@ -130,9 +131,10 @@ class Document(ABC):
         self.min_chunk_size = min_chunk_size
         self.min_leftover_chunk_size = min_leftover_chunk_size
         self.text_split_order = text_split_order
+        self.tokenizer = tokenizer
 
     @abstractmethod
-    async def get_parsed_content(self) -> str:
+    async def get_parsed_content(self) -> tuple[str, dict[str, Any]]:
         """
         Parse raw `page_content` into text.
 
@@ -154,6 +156,7 @@ class Document(ABC):
         min_chunk_size: int = None,
         min_leftover_chunk_size: int = None,
         text_split_order: list[str] = None,
+        tokenizer: str = None,
     ) -> list[dict[str, Any]]:
         """
         Chunk `parsed_content` using either instance defaults or provided overrides.
@@ -174,35 +177,46 @@ class Document(ABC):
         """
         # ensure parsed_content
         if not self.parsed_content:
-            text, parse_meta = await self.get_parsed_content()
-            self.parsed_content = text
-            self.metadata.add_items(parse_meta)
+            self.parsed_content = await self.get_parsed_content()
 
-        # Use overrides or fall back to defaults
-        cfg = {
-            "method": method or self.chunk_method,
-            "max_chunk_size": max_chunk_size or self.max_chunk_size,
-            "min_chunk_size": min_chunk_size if min_chunk_size is not None else self.min_chunk_size,
-            "min_leftover_chunk_size": min_leftover_chunk_size
-            if min_leftover_chunk_size is not None
-            else self.min_leftover_chunk_size,
-            "text_split_order": text_split_order or self.text_split_order,
-            "encoding_name": self.encoding,
-        }
+        # Check if any parameter is different from last setting
+        param_change_flag = False
+        if (method is not None) and (method != self.chunk_method):
+            param_change_flag = True
+            self.chunk_method = method
+        if (max_chunk_size is not None) and (max_chunk_size != self.max_chunk_size):
+            param_change_flag = True
+            self.max_chunk_size = max_chunk_size
+        if (min_chunk_size is not None) and (min_chunk_size != self.min_chunk_size):
+            param_change_flag = True
+            self.min_chunk_size = min_chunk_size
+        if (min_leftover_chunk_size is not None) and (
+            min_leftover_chunk_size != self.min_leftover_chunk_size
+        ):
+            param_change_flag = True
+            self.min_leftover_chunk_size = min_leftover_chunk_size
+        if (text_split_order is not None) and (text_split_order != self.text_split_order):
+            param_change_flag = True
+            self.text_split_order = text_split_order
+        if (tokenizer is not None) and (tokenizer != self.tokenizer):
+            param_change_flag = True
+            self.tokenizer = tokenizer
 
-        # perform chunking
-        chunks, chunk_meta = chunk_text(
-            self.parsed_content,
-            method=cfg["method"],
-            max_chunk_size=cfg["max_chunk_size"],
-            min_chunk_size=cfg["min_chunk_size"],
-            min_leftover_chunk_size=cfg["min_leftover_chunk_size"],
-            text_split_order=cfg["text_split_order"],
-            encoding_name=cfg["encoding_name"],
-        )
-        self.chunks = chunks
-        self.metadata.add_items(chunk_meta)
-        return chunks
+        if param_change_flag or len(self.chunks) == 0:
+            # perform chunking - TODO: check if error handling is needed here
+            chunks, chunk_meta = chunk_text(
+                self.parsed_content,
+                method=self.chunk_method,
+                max_chunk_size=self.max_chunk_size,
+                min_chunk_size=self.min_chunk_size,
+                min_leftover_chunk_size=self.min_leftover_chunk_size,
+                text_split_order=self.text_split_order,
+                encoding_name=self.tokenizer,
+            )
+            self.chunks = chunks
+            self.metadata.add_items(chunk_meta)
+
+        return self.chunks
 
 
 # ─── Concrete Document Types ─────────────────────────────────────────────────
