@@ -10,12 +10,14 @@ requires-python = ">=3.12"
 dependencies = [
     "openai",
     "pandas",
-    "numpy"
+    "numpy",
+    "ipykernel",
+    "tiktoken",
 ]
 
 [project.optional-dependencies]
 dev = ["pre-commit", "ruff", "black", "pytest"]
-ingest = ["beautifulsoup4", "html2text"]
+ingest = ["beautifulsoup4", "html2text", "pdfminer.six"]
 
 [build-system]
 requires = ["setuptools>=61"]
