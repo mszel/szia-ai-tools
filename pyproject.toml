@@ -14,6 +14,7 @@ dependencies = [
     "ipykernel",
     "tiktoken",
     "matplotlib",
+    "aiolimiter",
 ]
 
 [project.optional-dependencies]
