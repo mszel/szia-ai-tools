@@ -1,8 +1,8 @@
-from .llm_completion import LLMCompletion
+from .llm_completion import LLMPromptProcessor
 from .prompts import ChatCompletionPrompt, Message
 
 __all__ = [
-    "LLMCompletion",
+    "LLMPromptProcessor",
     "Message",
     "ChatCompletionPrompt",
 ]

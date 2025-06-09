@@ -8,22 +8,7 @@ from aiolimiter import AsyncLimiter
 from .prompts import ChatCompletionPrompt, Message
 
 
-class ChatCompletionPrompt:
-    """
-    Bundles a list of Message instances for a chat completion.
-    """
-
-    def __init__(self, messages: list[Message]):
-        self.messages = messages
-
-    def to_dicts(self) -> list[dict[str, Any]]:
-        """
-        Convert each Message to the dict form expected by the API.
-        """
-        return [m.to_dict() for m in self.messages]
-
-
-class LLMCompletionBase(ABC):
+class LLMPromptProcessorBase(ABC):
     """
     Abstract base for LLM chat completion providers.
     """
@@ -41,7 +26,7 @@ class LLMCompletionBase(ABC):
         pass
 
 
-class LLMCompletionOpenai(LLMCompletionBase):
+class LLMPromptProcessorOpenai(LLMPromptProcessorBase):
     """
     OpenAI chat completion using the OpenAI Python V2 client.
 
@@ -111,7 +96,7 @@ class LLMCompletionOpenai(LLMCompletionBase):
 
 
 # Facade
-class LLMCompletion:
+class LLMPromptProcessor:
     """
     High-level interface selecting a chat completion backend.
     Supported names: 'openai', 'ollama' (stub).
@@ -120,7 +105,7 @@ class LLMCompletion:
     def __init__(self, name: str = "openai", **kwargs):
         provider = name.lower()
         if provider == "openai":
-            self.impl = LLMCompletionOpenai(**kwargs)
+            self.impl = LLMPromptProcessorOpenai(**kwargs)
         elif provider == "ollama":
             # Placeholder for Ollama-based implementation
             raise NotImplementedError("Ollama chat not yet implemented")
@@ -128,7 +113,7 @@ class LLMCompletion:
             raise ValueError(f"Unknown LLM provider: {name}")
 
     @classmethod
-    async def acreate(cls, name: str = "openai", **kwargs) -> "LLMCompletion":
+    async def from_params(cls, name: str = "openai", **kwargs) -> "LLMPromptProcessor":
         """
         Async constructor for LLMCompletion.
         """
