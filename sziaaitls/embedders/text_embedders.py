@@ -14,6 +14,7 @@ from abc import ABC, abstractmethod
 
 import aiohttp
 import openai
+import tiktoken
 from aiolimiter import AsyncLimiter
 
 
@@ -45,6 +46,8 @@ class TextEmbedderOpenai(TextEmbedderBase):
 
     Uses an AsyncLimiter to respect rate limits (requests per time period),
     and batches inputs to stay within token limits.
+
+    TODO: test if it's working with Ollama already.
     """
 
     def __init__(
@@ -55,6 +58,7 @@ class TextEmbedderOpenai(TextEmbedderBase):
         period: int = 60,
         max_batch_tokens: int = 8191,
         encoding_name: str = "cl100k_base",
+        base_url: str | None = None,
     ):
         """
         Initialize the OpenAI embedder.
@@ -67,9 +71,14 @@ class TextEmbedderOpenai(TextEmbedderBase):
             max_batch_tokens: Max total tokens per batch of inputs.
             encoding_name: Tokenizer name for batching (e.g. 'cl100k_base').
         """
-        import tiktoken
 
-        openai.api_key = api_key
+        logparams = {
+            "api_key": api_key,
+        }
+        if base_url:
+            logparams["base_url"] = base_url
+
+        self.client = openai.OpenAI(**logparams)
         self.model = model
         self.limiter = AsyncLimiter(max_rate=rate_limit, time_period=period)
         self.max_batch_tokens = max_batch_tokens
@@ -107,7 +116,7 @@ class TextEmbedderOpenai(TextEmbedderBase):
             async with self.limiter:
                 # run sync call in threadpool
                 resp = await asyncio.to_thread(
-                    openai.embeddings.create,
+                    self.client.embeddings.create,
                     input=batch_texts,
                     model=self.model,
                 )
