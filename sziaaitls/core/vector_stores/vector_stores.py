@@ -20,7 +20,7 @@ import numpy as np
 # VDBs
 from usearch.index import Index
 
-from sziaaitls.embedders import Embedding, EmbeddingSimilarity
+from sziaaitls.core.embedders import Embedding, EmbeddingSimilarity
 
 
 class VectorStoreBase(ABC):

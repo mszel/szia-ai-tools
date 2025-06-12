@@ -10,10 +10,10 @@ The codes are written by o4-mini-high (based on a provided design).
 from abc import ABC, abstractmethod
 from typing import Any
 
-from sziaaitls.document_library.chunkers import chunk_text
+from sziaaitls.core.document_library.chunkers import chunk_text
 
 # ─── Import parsers and chunkers ────────────────────────────────────────────
-from sziaaitls.document_library.parsers import (
+from sziaaitls.core.document_library.parsers import (
     parse_html,
     parse_markdown,
     parse_pdf,
