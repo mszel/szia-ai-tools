@@ -5,13 +5,15 @@ from a document library.
 It's a simple solution, will be extended by (TODO):
  - delete option
  - making the data load even more parallel (not just the embedding part)
+ - saving/loading the RAG solution
+ - search_multiquery: finding the best fits for multiple queries
 """
 
 from typing import Any
 
-from sziaaitls.document_library import DocumentLibrary
-from sziaaitls.embedders import Embedding, EmbeddingSimilarity, TextEmbedder
-from sziaaitls.vector_stores import VectorStore
+from sziaaitls.core.document_library import DocumentLibrary
+from sziaaitls.core.embedders import Embedding, EmbeddingSimilarity, TextEmbedder
+from sziaaitls.core.vector_stores import VectorStore
 
 
 class SimpleRAG:
