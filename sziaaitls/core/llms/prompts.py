@@ -39,15 +39,24 @@ class Message:
         """
         Return a new Message with placeholders in content replaced.
 
-        Example:
-            msg = Message("user", "Hello, {name}!")
-            msg2 = msg.format(name="Alice")  # content="Hello, Alice!"
+        Unknown placeholders are left intact.
         """
-        formatted = None
-        if self.content is not None:
-            formatted = self.content.format(**params)
-        # leave extra fields untouched
-        return Message(role=self.role, content=formatted, name=self.name, **self.extra)
+        if self.content is None:
+            # nothing to format
+            return Message(self.role, None, self.name, **self.extra)
+
+        # a dict that returns "{key}" for missing keys
+        class _SafeDict(dict):
+            def __missing__(self, key):
+                return "{" + key + "}"
+
+        try:
+            formatted = self.content.format_map(_SafeDict(params))
+        except Exception:
+            # fall back in the very unlikely case of other format errors
+            formatted = self.content
+
+        return Message(self.role, formatted, self.name, **self.extra)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Message":
