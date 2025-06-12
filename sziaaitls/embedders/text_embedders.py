@@ -226,7 +226,7 @@ class TextEmbedder:
             raise ValueError(f"Unknown embedder provider: {name}")
 
     @classmethod
-    async def acreate(cls, name: str = "openai", **kwargs) -> "TextEmbedder":
+    async def buildup(cls, name: str = "openai", **kwargs) -> "TextEmbedder":
         """
         Async constructor. Returns a ready-to-use TextEmbedder.
         """
